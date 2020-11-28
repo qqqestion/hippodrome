@@ -45,32 +45,13 @@ public class CompetitionForm extends MainForm implements ActionListener {
     }
 
     private void initComboBox() {
-        actionComboBox.addItem(ActionEnum.SHOW_PROFILE);
-        actionComboBox.addItem(ActionEnum.SHOW_JOCKEYS);
-        actionComboBox.addItem(ActionEnum.SHOW_HORSES);
-        actionComboBox.addItem(ActionEnum.SHOW_COMPETITIONS);
-        actionComboBox.addItem(ActionEnum.SHOW_HIPPODROMES);
-
-        actionComboBox.setSelectedItem(ActionEnum.SHOW_COMPETITIONS);
+        initMenu(actionComboBox);
         actionComboBox.addActionListener(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        ActionEnum action = (ActionEnum) actionComboBox.getSelectedItem();
-        switch (action) {
-            case SHOW_PROFILE:
-                dispose();
-                new ProfileForm();
-                break;
-            case SHOW_JOCKEYS:
-                break;
-            case SHOW_HORSES:
-                break;
-            case SHOW_COMPETITIONS:
-                return;
-            case SHOW_HIPPODROMES:
-                break;
-        }
+        ActionEnum newAction = (ActionEnum) actionComboBox.getSelectedItem();
+        changeWindow(newAction);
     }
 }

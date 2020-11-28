@@ -34,13 +34,7 @@ public class ProfileForm extends MainForm implements ActionListener {
     }
 
     private void initBoxes() {
-        actionComboBox.addItem(ActionEnum.SHOW_PROFILE);
-        actionComboBox.addItem(ActionEnum.SHOW_JOCKEYS);
-        actionComboBox.addItem(ActionEnum.SHOW_HORSES);
-        actionComboBox.addItem(ActionEnum.SHOW_COMPETITIONS);
-        actionComboBox.addItem(ActionEnum.SHOW_HIPPODROMES);
-
-        actionComboBox.setSelectedItem(action);
+        initMenu(actionComboBox);
         actionComboBox.addActionListener(this);
     }
 
@@ -60,24 +54,8 @@ public class ProfileForm extends MainForm implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
         if (source == actionComboBox) {
-            ActionEnum action = (ActionEnum) actionComboBox.getSelectedItem();
-            if (action == ActionEnum.SHOW_PROFILE) {
-                return;
-            }
-            dispose();
-            switch (action) {
-                case SHOW_JOCKEYS:
-                    new JockeyForm();
-                    break;
-                case SHOW_HORSES:
-                    new HorseForm();
-                    break;
-                case SHOW_COMPETITIONS:
-                    new CompetitionForm();
-                case SHOW_HIPPODROMES:
-                    new HippodromeForm();
-                    break;
-            }
+            ActionEnum newAction = (ActionEnum) actionComboBox.getSelectedItem();
+            changeWindow(newAction);
         } else if (source == saveButton) {
             System.out.println("Save");
             try {
@@ -95,10 +73,6 @@ public class ProfileForm extends MainForm implements ActionListener {
         } else {
             throw new RuntimeException("unknown event");
         }
-    }
-
-    private void resetPassword() {
-
     }
 
     private void changePassword() {
