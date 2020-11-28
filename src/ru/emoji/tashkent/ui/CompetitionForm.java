@@ -1,10 +1,10 @@
 package ru.emoji.tashkent.ui;
 
 import ru.emoji.tashkent.Application;
-import ru.emoji.tashkent.database.ActionEnum;
+import ru.emoji.tashkent.ActionEnum;
 import ru.emoji.tashkent.database.entity.User;
 import ru.emoji.tashkent.database.manager.CompetitionManager;
-import ru.emoji.tashkent.utils.BaseForm;
+import ru.emoji.tashkent.utils.MainForm;
 import ru.emoji.tashkent.utils.Utils;
 
 import javax.swing.*;
@@ -13,7 +13,7 @@ import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
-public class MainForm extends BaseForm implements ActionListener {
+public class CompetitionForm extends MainForm implements ActionListener {
     private JPanel mainPanel;
     private JLabel upcomingCompetitionLabel;
     private JLabel currentCompetitionLabel;
@@ -23,15 +23,10 @@ public class MainForm extends BaseForm implements ActionListener {
     private JTextPane pastTextPane;
     private JComboBox actionComboBox;
 
-    User authUser;
     CompetitionManager competitionManager = new CompetitionManager(Application.getInstance().getDatabase());
 
-    public MainForm() {
-        this(null);
-    }
-
-    public MainForm(User authUser) {
-        this.authUser = authUser;
+    public CompetitionForm() {
+        super(ActionEnum.SHOW_COMPETITIONS);
         setContentPane(mainPanel);
         initComboBox();
         LocalDateTime today = LocalDateTime.now();
@@ -61,22 +56,12 @@ public class MainForm extends BaseForm implements ActionListener {
     }
 
     @Override
-    public int getFormWidth() {
-        return 500;
-    }
-
-    @Override
-    public int getFormHeight() {
-        return 300;
-    }
-
-    @Override
     public void actionPerformed(ActionEvent e) {
         ActionEnum action = (ActionEnum) actionComboBox.getSelectedItem();
         switch (action) {
             case SHOW_PROFILE:
                 dispose();
-                new ProfileForm(authUser);
+                new ProfileForm();
                 break;
             case SHOW_JOCKEYS:
                 break;

@@ -6,8 +6,6 @@ import ru.emoji.tashkent.database.manager.UserManager;
 import ru.emoji.tashkent.utils.BaseForm;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.sql.SQLException;
@@ -62,8 +60,9 @@ public class LoginForm extends BaseForm implements ItemListener {
             e.printStackTrace();
         }
         if (user != null) {
+            Application.getInstance().setUser(user);
             dispose();
-            new MainForm(user);
+            new CompetitionForm();
         } else {
             JOptionPane.showMessageDialog(this, "Почта или пароль неправильны");
         }

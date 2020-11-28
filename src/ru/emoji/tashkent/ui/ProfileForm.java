@@ -1,17 +1,17 @@
 package ru.emoji.tashkent.ui;
 
 import ru.emoji.tashkent.Application;
-import ru.emoji.tashkent.database.ActionEnum;
+import ru.emoji.tashkent.ActionEnum;
 import ru.emoji.tashkent.database.entity.User;
 import ru.emoji.tashkent.database.manager.UserManager;
-import ru.emoji.tashkent.utils.BaseForm;
+import ru.emoji.tashkent.utils.MainForm;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
 
-public class ProfileForm extends BaseForm implements ActionListener {
+public class ProfileForm extends MainForm implements ActionListener {
     private JPanel mainPanel;
     private JTextField firstNameField;
     private JTextField birthYearField;
@@ -21,11 +21,11 @@ public class ProfileForm extends BaseForm implements ActionListener {
     private JComboBox actionComboBox;
     private JTextField lastNameField;
 
-    private final User authUser;
+    private final User user = Application.getInstance().getUser();
     private final UserManager manager = new UserManager(Application.getInstance().getDatabase());
 
-    public ProfileForm(User authUser) {
-        this.authUser = authUser;
+    public ProfileForm() {
+        super(ActionEnum.SHOW_PROFILE);
         setContentPane(mainPanel);
         setVisible(true);
         initBoxes();
@@ -40,15 +40,15 @@ public class ProfileForm extends BaseForm implements ActionListener {
         actionComboBox.addItem(ActionEnum.SHOW_COMPETITIONS);
         actionComboBox.addItem(ActionEnum.SHOW_HIPPODROMES);
 
-        actionComboBox.setSelectedItem(ActionEnum.SHOW_PROFILE);
+        actionComboBox.setSelectedItem(action);
         actionComboBox.addActionListener(this);
     }
 
     private void initFields() {
-        firstNameField.setText(authUser.getFirstName());
-        lastNameField.setText(authUser.getLastName());
-        birthYearField.setText(String.valueOf(authUser.getBirthYear()));
-        emailField.setText(authUser.getEmail());
+        firstNameField.setText(user.getFirstName());
+        lastNameField.setText(user.getLastName());
+        birthYearField.setText(String.valueOf(user.getBirthYear()));
+        emailField.setText(user.getEmail());
     }
 
     private void initButtons() {
@@ -57,31 +57,25 @@ public class ProfileForm extends BaseForm implements ActionListener {
     }
 
     @Override
-    public int getFormWidth() {
-        return 500;
-    }
-
-    @Override
-    public int getFormHeight() {
-        return 300;
-    }
-
-    @Override
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
         if (source == actionComboBox) {
             ActionEnum action = (ActionEnum) actionComboBox.getSelectedItem();
+            if (action == ActionEnum.SHOW_PROFILE) {
+                return;
+            }
+            dispose();
             switch (action) {
-                case SHOW_PROFILE:
-                    return;
                 case SHOW_JOCKEYS:
+                    new JockeyForm();
                     break;
                 case SHOW_HORSES:
+                    new HorseForm();
                     break;
                 case SHOW_COMPETITIONS:
-                    dispose();
-                    new MainForm(authUser);
+                    new CompetitionForm();
                 case SHOW_HIPPODROMES:
+                    new HippodromeForm();
                     break;
             }
         } else if (source == saveButton) {
@@ -116,7 +110,7 @@ public class ProfileForm extends BaseForm implements ActionListener {
                 null,
                 null,
                 "");
-        if (!authUser.getPassword().equals(currentPassword)) {
+        if (!user.getPassword().equals(currentPassword)) {
             JOptionPane.showMessageDialog(this,
                     "Неверный пароль", "Ошибка", JOptionPane.ERROR_MESSAGE);
             return;
@@ -129,9 +123,9 @@ public class ProfileForm extends BaseForm implements ActionListener {
                 null,
                 null,
                 "");
-        authUser.setPassword(newPassword);
+        user.setPassword(newPassword);
         try {
-            manager.update(authUser);
+            manager.update(user);
             JOptionPane.showMessageDialog(this,
                     "Вы успешно обновили пароль!", "Успешно", JOptionPane.ERROR_MESSAGE);
         } catch (SQLException throwables) {
@@ -142,12 +136,12 @@ public class ProfileForm extends BaseForm implements ActionListener {
     }
 
     private void save() throws SQLException, NumberFormatException {
-        authUser.setEmail(emailField.getText());
-        authUser.setBirthYear(Integer.parseInt(birthYearField.getText()));
-        authUser.setFirstName(firstNameField.getText());
-        authUser.setLastName(lastNameField.getText());
-        if (authUser.isValid()) {
-            manager.update(authUser);
+        user.setEmail(emailField.getText());
+        user.setBirthYear(Integer.parseInt(birthYearField.getText()));
+        user.setFirstName(firstNameField.getText());
+        user.setLastName(lastNameField.getText());
+        if (user.isValid()) {
+            manager.update(user);
             JOptionPane.showMessageDialog(this,
                     "Вы успешно изменили профиль",
                     "Успешное изменение",

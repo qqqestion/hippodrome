@@ -55,7 +55,8 @@ public class RegisterForm extends BaseForm {
             UserManager manager = new UserManager(database);
             try {
                 manager.add(user);
-                new MainForm(user);
+                Application.getInstance().setUser(user);
+                new CompetitionForm();
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
                 JOptionPane.showMessageDialog(this,

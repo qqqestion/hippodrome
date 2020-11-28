@@ -1,12 +1,9 @@
 package ru.emoji.tashkent;
 
 import ru.emoji.tashkent.database.entity.User;
-import ru.emoji.tashkent.database.manager.CompetitionManager;
 import ru.emoji.tashkent.database.manager.UserManager;
-import ru.emoji.tashkent.ui.LoginForm;
-import ru.emoji.tashkent.ui.MainForm;
+import ru.emoji.tashkent.ui.CompetitionForm;
 import ru.emoji.tashkent.ui.ProfileForm;
-import ru.emoji.tashkent.ui.StartForm;
 import ru.emoji.tashkent.utils.BaseForm;
 import ru.emoji.tashkent.utils.MysqlDatabase;
 
@@ -15,6 +12,8 @@ import java.sql.SQLException;
 
 public class Application {
     private final MysqlDatabase database = new MysqlDatabase("localhost", "hippodrome", "newuser", "password");
+    private User user;
+
     private static Application instance;
 
     private final UserManager userManager = new UserManager(database);
@@ -33,7 +32,8 @@ public class Application {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-        new ProfileForm(user);
+        setUser(user);
+        new ProfileForm();
     }
 
     private void initDatabase() {
@@ -57,5 +57,13 @@ public class Application {
 
     public MysqlDatabase getDatabase() {
         return database;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }
