@@ -9,7 +9,8 @@ public class Horse {
     private String owner;
     private int price;
 
-    public Horse(int id, String name, int birthYear, int experience, String owner, int price) {
+    public Horse(int id, String name, int birthYear,
+                 int experience, String owner, int price) {
         this.id = id;
         this.name = name;
         this.birthYear = birthYear;
@@ -18,7 +19,8 @@ public class Horse {
         this.price = price;
     }
 
-    public Horse(String name, int birthYear, int experience, String owner, int price) {
+    public Horse(String name, int birthYear,
+                 int experience, String owner, int price) {
         this(-1, name, birthYear, experience, owner, price);
     }
 

@@ -7,17 +7,19 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserManager {
-    private MysqlDatabase database;
+public class UserManager extends Manager<User> {
 
     public UserManager(MysqlDatabase database) {
-        this.database = database;
+        super(database);
     }
 
+    @Override
     public void add(User user) throws SQLException {
         try (Connection conn = database.getConnection()) {
-            String sql = "INSERT INTO users (first_name, last_name, birth_year, email, password) VALUES (?, ?, ?, ?, ?)";
-            PreparedStatement statement = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+            String sql = "INSERT INTO users (first_name, last_name, " +
+                    "birth_year, email, password) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement statement = conn.prepareStatement(sql,
+                    PreparedStatement.RETURN_GENERATED_KEYS);
             statement.setString(1, user.getFirstName());
             statement.setString(2, user.getLastName());
             statement.setInt(3, user.getBirthYear());
@@ -34,6 +36,7 @@ public class UserManager {
         }
     }
 
+    @Override
     public User getById(int id) throws SQLException {
         try (Connection conn = database.getConnection()) {
             String sql = "SELECT * FROM users WHERE id = ?";
@@ -48,7 +51,8 @@ public class UserManager {
                         result.getString("last_name"),
                         result.getInt("birth_year"),
                         result.getString("email"),
-                        result.getString("password")
+                        result.getString("password"),
+                        result.getBoolean("is_admin")
                 );
             }
             return null;
@@ -70,13 +74,15 @@ public class UserManager {
                         result.getString("last_name"),
                         result.getInt("birth_year"),
                         result.getString("email"),
-                        result.getString("password")
+                        result.getString("password"),
+                        result.getBoolean("is_admin")
                 );
             }
             return null;
         }
     }
 
+    @Override
     public List<User> getAll() throws SQLException {
         try (Connection conn = database.getConnection()) {
             String sql = "SELECT * FROM users";
@@ -91,16 +97,19 @@ public class UserManager {
                         result.getString("last_name"),
                         result.getInt("birth_year"),
                         result.getString("email"),
-                        result.getString("password")
+                        result.getString("password"),
+                        result.getBoolean("is_admin")
                 ));
             }
             return userList;
         }
     }
 
+    @Override
     public int update(User user) throws SQLException {
         try (Connection c = database.getConnection()) {
-            String sql = "UPDATE users SET first_name=?, last_name=?, birth_year=?, email=?, password=? WHERE id=?";
+            String sql = "UPDATE users SET first_name=?, last_name=?, " +
+                    "birth_year=?, email=?, password=? WHERE id=?";
 
             PreparedStatement s = c.prepareStatement(sql);
             s.setString(1, user.getFirstName());
@@ -114,12 +123,36 @@ public class UserManager {
         }
     }
 
+    @Override
+    public int delete(User object) throws SQLException {
+        if (object.getId() == -1) {
+            return deleteById(object.getId());
+        }
+        return deleteByEmail(object.getEmail());
+    }
+
+    @Override
+    public String getTableName() {
+        return "users";
+    }
+
     public int deleteById(int id) throws SQLException {
         try (Connection c = database.getConnection()) {
             String sql = "DELETE FROM users WHERE id=?";
 
             PreparedStatement s = c.prepareStatement(sql);
             s.setInt(1, id);
+
+            return s.executeUpdate();
+        }
+    }
+
+    public int deleteByEmail(String email) throws SQLException {
+        try (Connection c = database.getConnection()) {
+            String sql = "DELETE FROM users WHERE email=?";
+
+            PreparedStatement s = c.prepareStatement(sql);
+            s.setString(1, email);
 
             return s.executeUpdate();
         }

@@ -9,18 +9,20 @@ public class User {
     private int birthYear;
     private String email;
     private String password;
+    private boolean isAdmin;
 
-    public User(int id, String firstName, String lastName, int birthYear, String email, String password) {
+    public User(int id, String firstName, String lastName, int birthYear, String email, String password, boolean isAdmin) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthYear = birthYear;
         this.email = email;
         this.password = password;
+        this.isAdmin = isAdmin;
     }
 
-    public User(String firstName, String lastName, int birthYear, String email, String password) {
-        this(-1, firstName, lastName, birthYear, email, password);
+    public User(String firstName, String lastName, int birthYear, String email, String password, boolean isAdmin) {
+        this(-1, firstName, lastName, birthYear, email, password, isAdmin);
     }
 
     @Override
@@ -81,6 +83,10 @@ public class User {
 
     public void setBirthYear(int birthYear) {
         this.birthYear = birthYear;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin;
     }
 
     public boolean isFirstNameValid() {

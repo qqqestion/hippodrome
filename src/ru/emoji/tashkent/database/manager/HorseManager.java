@@ -7,13 +7,12 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HorseManager {
-    private MysqlDatabase database;
-
+public class HorseManager extends Manager<Horse> {
     public HorseManager(MysqlDatabase database) {
-        this.database = database;
+        super(database);
     }
 
+    @Override
     public void add(Horse horse) throws SQLException {
         try (Connection conn = database.getConnection()) {
             String sql = "INSERT INTO horses (name, birth_year, experience, " +
@@ -32,10 +31,11 @@ public class HorseManager {
                 horse.setId(keys.getInt(1));
                 return;
             }
-            throw new SQLException("User not added");
+            throw new SQLException("Horse not added");
         }
     }
 
+    @Override
     public Horse getById(int id) throws SQLException {
         try (Connection conn = database.getConnection()) {
             String sql = "SELECT * FROM horses WHERE id = ?";
@@ -78,15 +78,16 @@ public class HorseManager {
         }
     }
 
+    @Override
     public List<Horse> getAll() throws SQLException {
         try (Connection conn = database.getConnection()) {
             String sql = "SELECT * FROM horses";
             Statement statement = conn.createStatement();
 
             ResultSet result = statement.executeQuery(sql);
-            List<Horse> userList = new ArrayList<>();
+            List<Horse> horseList = new ArrayList<>();
             while (result.next()) {
-                userList.add(new Horse(
+                horseList.add(new Horse(
                     result.getInt("id"),
                     result.getString("name"),
                     result.getInt("birth_year"),
@@ -95,10 +96,11 @@ public class HorseManager {
                     result.getInt("price")
                 ));
             }
-            return userList;
+            return horseList;
         }
     }
 
+    @Override
     public int update(Horse horse) throws SQLException {
         try (Connection c = database.getConnection()) {
             String sql = "UPDATE horses SET name=?, birth_year=?, " +
@@ -116,12 +118,36 @@ public class HorseManager {
         }
     }
 
+    @Override
+    public int delete(Horse object) throws SQLException {
+        if (object.getId() == -1) {
+            return deleteById(object.getId());
+        }
+        return deleteByName(object.getName());
+    }
+
+    @Override
+    public String getTableName() {
+        return "horses";
+    }
+
     public int deleteById(int id) throws SQLException {
         try (Connection c = database.getConnection()) {
             String sql = "DELETE FROM horses WHERE id=?";
 
             PreparedStatement s = c.prepareStatement(sql);
             s.setInt(1, id);
+
+            return s.executeUpdate();
+        }
+    }
+
+    public int deleteByName(String name) throws SQLException {
+        try (Connection c = database.getConnection()) {
+            String sql = "DELETE FROM horses WHERE name=?";
+
+            PreparedStatement s = c.prepareStatement(sql);
+            s.setString(1, name);
 
             return s.executeUpdate();
         }
