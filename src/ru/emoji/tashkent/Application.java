@@ -2,9 +2,7 @@ package ru.emoji.tashkent;
 
 import ru.emoji.tashkent.database.entity.User;
 import ru.emoji.tashkent.database.manager.UserManager;
-import ru.emoji.tashkent.ui.CompetitionForm;
-import ru.emoji.tashkent.ui.JockeyForm;
-import ru.emoji.tashkent.ui.ProfileForm;
+import ru.emoji.tashkent.ui.*;
 import ru.emoji.tashkent.utils.BaseForm;
 import ru.emoji.tashkent.utils.MysqlDatabase;
 
@@ -34,13 +32,14 @@ public class Application {
             throwables.printStackTrace();
         }
         setUser(user);
-        new JockeyForm();
+        new CompetitionForm();
     }
 
     private void initDatabase() {
         try (Connection conn = database.getConnection()) {
         } catch (SQLException e) {
             e.printStackTrace();
+            System.exit(-1);
         }
     }
 

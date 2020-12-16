@@ -7,6 +7,8 @@ public class Hippodrome {
     private int peopleCapacity;
     private String website;
 
+    public Hippodrome() {}
+
     public Hippodrome(int id, String name, String address, int peopleCapacity, String website) {
         this.id = id;
         this.name = name;

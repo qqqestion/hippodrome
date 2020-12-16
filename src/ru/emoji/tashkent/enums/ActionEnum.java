@@ -1,4 +1,4 @@
-package ru.emoji.tashkent;
+package ru.emoji.tashkent.enums;
 
 import ru.emoji.tashkent.database.entity.User;
 import ru.emoji.tashkent.ui.*;
@@ -12,7 +12,6 @@ public enum ActionEnum {
     SHOW_JOCKEYS("Жокеи"),
     SHOW_HORSES("Лошади"),
     SHOW_COMPETITIONS("Соревнования"),
-    SHOW_HIPPODROMES("Ипподромы"),
     SHOW_ADMIN("Панель админа");
 
     private final String locale;

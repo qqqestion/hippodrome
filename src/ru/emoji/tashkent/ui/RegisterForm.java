@@ -3,13 +3,13 @@ package ru.emoji.tashkent.ui;
 import ru.emoji.tashkent.Application;
 import ru.emoji.tashkent.database.entity.User;
 import ru.emoji.tashkent.database.manager.UserManager;
-import ru.emoji.tashkent.utils.BaseForm;
-import ru.emoji.tashkent.utils.MysqlDatabase;
+import ru.emoji.tashkent.utils.*;
 
 import javax.swing.*;
 import java.sql.SQLException;
 
-public class RegisterForm extends BaseForm {
+public class RegisterForm extends BaseForm
+        implements DatabaseUsage, OnKeyClickListenerListener {
     private JPanel mainPanel;
     private JTextField firstNameField;
     private JTextField lastNameField;
@@ -29,7 +29,18 @@ public class RegisterForm extends BaseForm {
     public RegisterForm() {
         setContentPane(mainPanel);
         initButtons();
+        initFields();
         setVisible(true);
+    }
+
+    private void initFields() {
+        ActionOnEnterListener keyListener = new ActionOnEnterListener(this);
+
+        firstNameField.addKeyListener(keyListener);
+        lastNameField.addKeyListener(keyListener);
+        birthYearField.addKeyListener(keyListener);
+        emailField.addKeyListener(keyListener);
+        passwordField.addKeyListener(keyListener);
     }
 
     private void initButtons() {
@@ -43,28 +54,31 @@ public class RegisterForm extends BaseForm {
     }
 
     private void register() {
-        User user = new User(
-                firstNameField.getText(),
-                lastNameField.getText(),
-                Integer.parseInt(birthYearField.getText()),
-                emailField.getText(),
-                String.valueOf(passwordField.getPassword()),
-                true
-        );
-        if (user.isValid()) {
-            UserManager manager = new UserManager(database);
-            try {
+        User user;
+        try {
+            user = new User(
+                    firstNameField.getText(),
+                    lastNameField.getText(),
+                    Integer.parseInt(birthYearField.getText()),
+                    emailField.getText(),
+                    String.valueOf(passwordField.getPassword()),
+                    false
+            );
+            if (user.isValid()) {
+                UserManager manager = new UserManager(database);
                 manager.add(user);
-                Application.getInstance().setUser(user);
-                new CompetitionForm();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-                JOptionPane.showMessageDialog(this,
-                        "Введенные значения не корректны",
-                        "Ошибка",
-                        JOptionPane.ERROR_MESSAGE);
             }
+        } catch (NumberFormatException | SQLException exp) {
+            exp.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Введенные значения не корректны",
+                    "Ошибка",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+
         }
+        Application.getInstance().setUser(user);
+        new CompetitionForm();
     }
 
     @Override
@@ -77,4 +91,8 @@ public class RegisterForm extends BaseForm {
         return 300;
     }
 
+    @Override
+    public void onSave() {
+        register();
+    }
 }

@@ -1,26 +1,30 @@
 package ru.emoji.tashkent.database.manager;
 
 import ru.emoji.tashkent.database.entity.Competition;
-import ru.emoji.tashkent.database.entity.Crew;
+import ru.emoji.tashkent.database.entity.Horse;
+import ru.emoji.tashkent.database.entity.Race;
+import ru.emoji.tashkent.database.entity.User;
 import ru.emoji.tashkent.utils.DateUtils;
 import ru.emoji.tashkent.utils.MysqlDatabase;
 
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class CompetitionManager extends Manager<Competition> {
+    private RaceManager raceManager;
+
     public CompetitionManager(MysqlDatabase database) {
         super(database);
+//        raceManager = new RaceManager(database);
     }
 
     @Override
     public void add(Competition object) throws SQLException {
         try (Connection conn = database.getConnection()) {
             String sql = "INSERT INTO competitions (name, fund, date_start, " +
-                    "date_end, hippodrome_id) VALUES (?, ?, ?, ?, ?)";
+                    "date_end) VALUES (?, ?, ?, ?)";
 
             PreparedStatement s = conn.prepareStatement(sql,
                     PreparedStatement.RETURN_GENERATED_KEYS);
@@ -28,7 +32,6 @@ public class CompetitionManager extends Manager<Competition> {
             s.setInt(2, object.getFund());
             s.setObject(3, object.getDateStart().format(DateUtils.MYSQL_FORMATTER));
             s.setObject(4, object.getDateEnd().format(DateUtils.MYSQL_FORMATTER));
-            s.setInt(5, object.getHippodromeId());
             s.executeUpdate();
 
             ResultSet keys = s.getGeneratedKeys();
@@ -40,29 +43,25 @@ public class CompetitionManager extends Manager<Competition> {
         }
     }
 
-    @Override
-    public Competition getById(int id) throws SQLException {
-        try (Connection conn = database.getConnection()) {
-            String sql = "SELECT * FROM competitions WHERE id = ?";
-            PreparedStatement statement = conn.prepareStatement(sql);
-            statement.setInt(1, id);
-
-            ResultSet result = statement.executeQuery();
-            if (result.next()) {
-                return getObjectFromResultSet(result);
-            }
-            return null;
-        }
-    }
+//    private void addOrUpdateRaces(Competition competition) throws SQLException {
+//        for (int i = 0; i < competition.getRaces().size(); i++) {
+//            Race race = competition.getRace(i);
+//            if (race.getId() == -1) {
+//                raceManager.add(race);
+//            } else {
+//                raceManager.update(race);
+//            }
+//        }
+//    }
 
     @Override
     public List<Competition> getAll() throws SQLException {
         try (Connection conn = database.getConnection()) {
-            String sql = "SELECT * FROM competitions";
+            String sql = "SELECT * FROM competitions order by date_start";
             Statement statement = conn.createStatement();
 
             ResultSet result = statement.executeQuery(sql);
-            return processResultSet(result);
+            return getEntityListFromResultSet(result);
         }
     }
 
@@ -73,7 +72,7 @@ public class CompetitionManager extends Manager<Competition> {
             statement.setObject(1, date);
 
             ResultSet result = statement.executeQuery();
-            return processResultSet(result);
+            return getEntityListFromResultSet(result);
         }
     }
 
@@ -84,7 +83,7 @@ public class CompetitionManager extends Manager<Competition> {
             statement.setObject(1, date);
 
             ResultSet result = statement.executeQuery();
-            return processResultSet(result);
+            return getEntityListFromResultSet(result);
         }
     }
 
@@ -96,41 +95,93 @@ public class CompetitionManager extends Manager<Competition> {
             statement.setObject(2, date);
 
             ResultSet result = statement.executeQuery();
-            return processResultSet(result);
+            return getEntityListFromResultSet(result);
         }
     }
 
-    private List<Competition> processResultSet(ResultSet result) throws SQLException {
-        List<Competition> list = new ArrayList<>();
-        while (result.next()) {
-            list.add(getObjectFromResultSet(result));
+    @Override
+    protected Competition getEntityFromResultSet(ResultSet result) throws SQLException {
+        Competition competition = null;
+        if (result.next()) {
+             competition = new Competition(
+                    result.getInt("id"),
+                    result.getString("name"),
+                    result.getInt("fund"),
+                    result.getObject("date_start", LocalDateTime.class),
+                    result.getObject("date_end", LocalDateTime.class)
+            );
+//            List<Race> races = raceManager.getByCompetitionId(competition.getId());
+//            competition.setRaces(races);
         }
-        return list;
+        return competition;
     }
 
-    private Competition getObjectFromResultSet(ResultSet result) throws SQLException {
-        return new Competition(
-                result.getInt("id"),
-                result.getString("name"),
-                result.getInt("fund"),
-                result.getObject("date_start", LocalDateTime.class),
-                result.getObject("date_end", LocalDateTime.class),
-                result.getInt("hippodrome_id")
-        );
+    public List<Competition> getCompetitionsThatHorseEnteredIn(Horse horse) throws SQLException {
+        try (Connection conn = database.getConnection()) {
+            String sql = "SELECT DISTINCT competitions.* " +
+                    "FROM competitions " +
+                    "join races r on competitions.id = r.competition_id " +
+                    "join crews c on r.crew_id = c.id " +
+                    "join horses h on c.horse_id = h.id " +
+                    "where h.id = ?";
+            PreparedStatement s = conn.prepareStatement(sql);
+            s.setInt(1, horse.getId());
+
+            ResultSet result = s.executeQuery();
+            return getEntityListFromResultSet(result);
+        }
+    }
+
+    public List<Competition> getCompetitionsThatUserEnteredIn(User user) throws SQLException {
+        try (Connection conn = database.getConnection()) {
+            String sql = "SELECT DISTINCT competitions.* " +
+                    "FROM competitions " +
+                    "join races r on competitions.id = r.competition_id " +
+                    "join crews c on r.crew_id = c.id " +
+                    "join users u on c.user_id = u.id " +
+                    "where u.id = ?";
+            PreparedStatement s = conn.prepareStatement(sql);
+            s.setInt(1, user.getId());
+
+            ResultSet result = s.executeQuery();
+            return getEntityListFromResultSet(result);
+        }
     }
 
     @Override
     public int update(Competition object) throws SQLException {
-        return 0;
+        try (Connection c = database.getConnection()) {
+            String sql = "UPDATE competitions SET name=?, " +
+                    "fund=?, date_start=?, date_end=? WHERE id=?";
+
+            PreparedStatement s = c.prepareStatement(sql);
+            s.setString(1, object.getName());
+            s.setInt(2, object.getFund());
+            s.setObject(3, object.getDateStart());
+            s.setObject(4, object.getDateEnd());
+            s.setInt(5, object.getId());
+
+            return s.executeUpdate();
+        }
+
     }
 
     @Override
     public int delete(Competition object) throws SQLException {
-        return 0;
+        System.out.println(object.getId() + " " + object.getName());
+        if (object.getId() != -1) {
+            return deleteById(object.getId());
+        }
+        throw new RuntimeException("delete not implementing");
+    }
+
+    @Override
+    public Competition createEntity() {
+        return new Competition();
     }
 
     @Override
     String getTableName() {
-        return null;
+        return "competitions";
     }
 }

@@ -11,6 +11,8 @@ public class User {
     private String password;
     private boolean isAdmin;
 
+    public User() {}
+
     public User(int id, String firstName, String lastName, int birthYear, String email, String password, boolean isAdmin) {
         this.id = id;
         this.firstName = firstName;

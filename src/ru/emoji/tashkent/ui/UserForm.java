@@ -2,11 +2,13 @@ package ru.emoji.tashkent.ui;
 
 import ru.emoji.tashkent.enums.ActionEnum;
 import ru.emoji.tashkent.Application;
-import ru.emoji.tashkent.database.entity.*;
-import ru.emoji.tashkent.database.manager.*;
+import ru.emoji.tashkent.database.entity.Competition;
+import ru.emoji.tashkent.database.entity.User;
+import ru.emoji.tashkent.database.manager.CompetitionManager;
+import ru.emoji.tashkent.database.manager.RaceManager;
+import ru.emoji.tashkent.database.manager.UserManager;
 import ru.emoji.tashkent.enums.DisplayTypeEnum;
 import ru.emoji.tashkent.utils.DateUtils;
-import ru.emoji.tashkent.utils.DialogUtil;
 import ru.emoji.tashkent.utils.DisplayCompetitionRaces;
 import ru.emoji.tashkent.utils.ModelViewForm;
 
@@ -16,17 +18,15 @@ import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.List;
 
-public class HorseForm extends ModelViewForm<Horse>
-        implements ActionListener, DisplayCompetitionRaces {
+public class UserForm extends
+        ModelViewForm<User> implements ActionListener, DisplayCompetitionRaces {
     private JPanel mainPanel;
     private JComboBox<ActionEnum> actionBox;
-    private JComboBox<Horse> horseBox;
-    private JTextField nameField;
+    private JComboBox<User> userBox;
+    private JTextField firstNameField;
+    private JTextField lastNameField;
     private JTextField birthYearField;
-    private JTextField experienceField;
-    private JTextField ownerField;
-    private JTextField priceField;
-    private JButton deleteButton;
+    private JTextField emailField;
     private JTextPane statisticPane;
     private JComboBox<Competition> competitionBox;
 
@@ -34,24 +34,22 @@ public class HorseForm extends ModelViewForm<Horse>
     private RaceManager raceManager;
 
 
-    public HorseForm() {
-        super(ActionEnum.SHOW_HORSES,
-                new HorseManager(Application.getInstance().getDatabase()));
+    public UserForm() {
+        super(ActionEnum.SHOW_JOCKEYS,
+                new UserManager(Application.getInstance().getDatabase()));
         competitionManager = new CompetitionManager(Application.getInstance().getDatabase());
         raceManager = new RaceManager(Application.getInstance().getDatabase());
 
         setContentPane(mainPanel);
-        setSearchField(horseBox);
 
-        initBoxes();
-
-        JTextField[] fields = new JTextField[]{nameField,
-                birthYearField, experienceField, ownerField, priceField};
+        JTextField[] fields = new JTextField[]{firstNameField,
+                lastNameField, birthYearField, emailField};
         setFields(fields);
-        setSearchField(horseBox);
+        setSearchField(userBox);
+        setCanBeEdited(false);
         initSearchFieldAndFields();
 
-        initDeleteButton(deleteButton);
+        initBoxes();
 
         setCompetitionsToTheBox();
         updateCompetitionInfo();
@@ -62,20 +60,8 @@ public class HorseForm extends ModelViewForm<Horse>
     private void initBoxes() {
         initMenu(actionBox);
         actionBox.addActionListener(this);
-        horseBox.addActionListener(this);
+        userBox.addActionListener(this);
         competitionBox.addActionListener(this);
-    }
-
-    @Override
-    protected List<String> getValuesFromModel(Horse element) {
-        if (element.getId() == -1) {
-            return fillStringList();
-        }
-        return List.of(element.getName(),
-                String.valueOf(element.getBirthYear()),
-                String.valueOf(element.getExperience()),
-                element.getOwner(),
-                String.valueOf(element.getPrice()));
     }
 
     @Override
@@ -84,7 +70,7 @@ public class HorseForm extends ModelViewForm<Horse>
         if (source == actionBox) {
             ActionEnum newAction = (ActionEnum) actionBox.getSelectedItem();
             changeWindow(newAction);
-        } else if (source == horseBox) {
+        } else if (source == userBox) {
             updateFields();
             setCompetitionsToTheBox();
             updateCompetitionInfo();
@@ -95,19 +81,19 @@ public class HorseForm extends ModelViewForm<Horse>
 
     private void setCompetitionsToTheBox() {
         competitionBox.removeAllItems();
-        Horse horse = (Horse) horseBox.getSelectedItem();
-        if (horse == null || horse.getId() == -1) {
+        User user = (User) userBox.getSelectedItem();
+        if (user == null || user.getId() == -1) {
             System.out.println("There is no horse");
             return;
         }
         List<Competition> competitions;
         try {
-            competitions = competitionManager.getCompetitionsThatHorseEnteredIn(horse);
+            competitions = competitionManager.getCompetitionsThatUserEnteredIn(user);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             return;
         }
-//        System.out.println("HorseForm::setCompetitionsToTheBox");
+//        System.out.println("UserForm::setCompetitionsToTheBox");
         for (Competition comp : competitions) {
 //            System.out.println(comp);
             competitionBox.addItem(comp);
@@ -127,37 +113,13 @@ public class HorseForm extends ModelViewForm<Horse>
                 .append("Дата начала: ").append(selectedComp.getDateStart().format(DateUtils.MYSQL_FORMATTER)).append("\n")
                 .append("Дата конца: ").append(selectedComp.getDateEnd().format(DateUtils.MYSQL_FORMATTER)).append("\n")
                 .append("Забеги: \n");
-
-        setParticipant(raceManager, selectedComp, statisticPane, sb, DisplayTypeEnum.DISPLAY_HORSE);
+        setParticipant(raceManager, selectedComp, statisticPane, sb, DisplayTypeEnum.DISPLAY_USER);
     }
 
+
     @Override
-    public void onSave() {
-        Horse horse = (Horse) horseBox.getSelectedItem();
-        try {
-            horse.setName(nameField.getText());
-            horse.setBirthYear(Integer.parseInt(birthYearField.getText()));
-            horse.setExperience(Integer.parseInt(experienceField.getText()));
-            horse.setOwner(ownerField.getText());
-            horse.setPrice(Integer.parseInt(priceField.getText()));
-            String msg;
-            if (horse.getId() == -1) {
-                manager.add(horse);
-                onItemAdded(horse.getId());
-                msg = "Лошадь успешно добавлена";
-            } else {
-                manager.update(horse);
-                msg = "Лошадь успешно обновлена";
-            }
-            DialogUtil.showInfo(this, msg);
-            // TODO: сделать отображение успешного сохранения.
-            //  Может быть подумать об иконке изменен/сохранен.
-        } catch (SQLException exp) {
-            exp.printStackTrace();
-            showError(this);
-        } catch (NumberFormatException exp) {
-            exp.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Введены неверные значения");
-        }
+    protected List<String> getValuesFromModel(User element) {
+        return List.of(element.getFirstName(), element.getLastName(),
+                String.valueOf(element.getBirthYear()), element.getEmail());
     }
 }

@@ -1,8 +1,6 @@
 package ru.emoji.tashkent.utils;
 
-import ru.emoji.tashkent.ActionEnum;
-import ru.emoji.tashkent.Application;
-import ru.emoji.tashkent.database.entity.User;
+import ru.emoji.tashkent.enums.ActionEnum;
 import ru.emoji.tashkent.ui.*;
 
 import javax.swing.*;
@@ -19,22 +17,21 @@ public abstract class MainForm extends BaseForm {
         actionBox.addItem(ActionEnum.SHOW_JOCKEYS);
         actionBox.addItem(ActionEnum.SHOW_HORSES);
         actionBox.addItem(ActionEnum.SHOW_COMPETITIONS);
-        actionBox.addItem(ActionEnum.SHOW_HIPPODROMES);
-        if (Application.getInstance().getUser().isAdmin()) {
-            actionBox.addItem(ActionEnum.SHOW_ADMIN);
-        }
+//        if (Application.getInstance().getUser().isAdmin()) {
+//            actionBox.addItem(ActionEnum.SHOW_ADMIN);
+//        }
 
         actionBox.setSelectedItem(action);
     }
 
     @Override
     public int getFormWidth() {
-        return 500;
+        return 1200;
     }
 
     @Override
     public int getFormHeight() {
-        return 300;
+        return 700;
     }
 
     protected void changeWindow(ActionEnum newAction) {
@@ -47,7 +44,7 @@ public abstract class MainForm extends BaseForm {
                 new ProfileForm();
                 break;
             case SHOW_JOCKEYS:
-                new JockeyForm();
+                new UserForm();
                 break;
             case SHOW_HORSES:
                 new HorseForm();
@@ -55,9 +52,9 @@ public abstract class MainForm extends BaseForm {
             case SHOW_COMPETITIONS:
                 new CompetitionForm();
                 break;
-            case SHOW_HIPPODROMES:
-                new HippodromeForm();
-                break;
+//            case SHOW_ADMIN:
+//                new AdminForm();
+//                break;
         }
     }
 }

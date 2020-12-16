@@ -3,18 +3,22 @@ package ru.emoji.tashkent.database.entity;
 public class Crew {
     private int id;
     private int number;
-    private int horseId;
-    private int userId;
+    private Horse horse;
+    private User user;
 
-    public Crew(int id, int number, int horseId, int userId) {
-        this.id = id;
-        this.number = number;
-        this.horseId = horseId;
-        this.userId = userId;
+    public Crew() {
+        this(-1, -1, null, null);
     }
 
-    public Crew(int number, int horseId, int userId) {
-        this(-1, number, horseId, userId);
+    public Crew(int id, int number, Horse horse, User user) {
+        this.id = id;
+        this.number = number;
+        this.horse = horse;
+        this.user = user;
+    }
+
+    public Crew(int number, Horse horse, User user) {
+        this(-1, number, horse, user);
     }
 
     public int getId() {
@@ -33,29 +37,24 @@ public class Crew {
         this.number = number;
     }
 
-    public int getHorseId() {
-        return horseId;
+    public Horse getHorse() {
+        return horse;
     }
 
-    public void setHorseId(int horseId) {
-        this.horseId = horseId;
+    public void setHorse(Horse horse) {
+        this.horse = horse;
     }
 
-    public int getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Override
     public String toString() {
-        return "Crew{" +
-                "id=" + id +
-                ", number=" + number +
-                ", horseId=" + horseId +
-                ", userId=" + userId +
-                '}';
+        return user.toString() + " и " + horse.toString();
     }
 }

@@ -104,6 +104,16 @@ public class HippodromeManager extends Manager<Hippodrome> {
         return deleteByName(object.getName());
     }
 
+    @Override
+    public Hippodrome createEntity() {
+        return new Hippodrome();
+    }
+
+    @Override
+    protected Hippodrome getEntityFromResultSet(ResultSet result) throws SQLException {
+        return null;
+    }
+
     public int deleteById(int id) throws SQLException {
         try (Connection c = database.getConnection()) {
             String sql = "DELETE FROM hippodromes WHERE id=?";

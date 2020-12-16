@@ -1,6 +1,9 @@
 package ru.emoji.tashkent.database.entity;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Horse {
     private int id;
     private String name;
@@ -8,6 +11,11 @@ public class Horse {
     private int experience;
     private String owner;
     private int price;
+    private List<Crew> crews = new ArrayList<>();
+
+    public Horse() {
+        this("", -1, -1, "", -1);
+    }
 
     public Horse(int id, String name, int birthYear,
                  int experience, String owner, int price) {
@@ -72,15 +80,27 @@ public class Horse {
         this.price = price;
     }
 
+    public List<Crew> getCrews() {
+        return crews;
+    }
+
+    public void setCrews(List<Crew> crews) {
+        this.crews = crews;
+    }
+
     @Override
     public String toString() {
-        return "Horse{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", birthYear=" + birthYear +
-                ", experience=" + experience +
-                ", owner='" + owner + '\'' +
-                ", price=" + price +
-                '}';
+        if (id == -1) {
+            return "Добавить лошадь..";
+        }
+        return name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Horse) {
+            return name.equals(((Horse) obj).name);
+        }
+        return super.equals(obj);
     }
 }

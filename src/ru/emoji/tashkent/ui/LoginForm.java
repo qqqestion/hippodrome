@@ -3,14 +3,18 @@ package ru.emoji.tashkent.ui;
 import ru.emoji.tashkent.Application;
 import ru.emoji.tashkent.database.entity.User;
 import ru.emoji.tashkent.database.manager.UserManager;
+import ru.emoji.tashkent.utils.ActionOnEnterListener;
 import ru.emoji.tashkent.utils.BaseForm;
+import ru.emoji.tashkent.utils.DatabaseUsage;
+import ru.emoji.tashkent.utils.OnKeyClickListenerListener;
 
 import javax.swing.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.sql.SQLException;
 
-public class LoginForm extends BaseForm implements ItemListener {
+public class LoginForm extends BaseForm
+        implements ItemListener, DatabaseUsage, OnKeyClickListenerListener {
     private JPanel mainPanel;
 
     private final UserManager manager = new UserManager(Application.getInstance().getDatabase());
@@ -28,14 +32,15 @@ public class LoginForm extends BaseForm implements ItemListener {
     public LoginForm() {
         setContentPane(mainPanel);
         setVisible(true);
-        try {
-            System.out.println(manager.getAll());
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
         showPasswordCheckBox.addItemListener(this);
-
         initButtons();
+        initFields();
+    }
+
+    private void initFields() {
+        ActionOnEnterListener keyListener = new ActionOnEnterListener(this);
+        emailField.addKeyListener(keyListener);
+        passwordField.addKeyListener(keyListener);
     }
 
     private void initButtons() {
@@ -58,6 +63,7 @@ public class LoginForm extends BaseForm implements ItemListener {
             user = manager.getByEmailAndPassword(email, password);
         } catch (SQLException e) {
             e.printStackTrace();
+            showError(this);
         }
         if (user != null) {
             Application.getInstance().setUser(user);
@@ -85,5 +91,10 @@ public class LoginForm extends BaseForm implements ItemListener {
         } else {
             passwordField.setEchoChar('●');
         }
+    }
+
+    @Override
+    public void onSave() {
+        login();
     }
 }

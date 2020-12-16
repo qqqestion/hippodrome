@@ -5,5 +5,5 @@ import java.util.logging.SimpleFormatter;
 
 public class DateUtils {
     public static DateTimeFormatter MYSQL_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 }

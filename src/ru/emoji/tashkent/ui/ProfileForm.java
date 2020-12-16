@@ -1,7 +1,7 @@
 package ru.emoji.tashkent.ui;
 
 import ru.emoji.tashkent.Application;
-import ru.emoji.tashkent.ActionEnum;
+import ru.emoji.tashkent.enums.ActionEnum;
 import ru.emoji.tashkent.database.entity.User;
 import ru.emoji.tashkent.database.manager.UserManager;
 import ru.emoji.tashkent.utils.MainForm;
@@ -84,6 +84,9 @@ public class ProfileForm extends MainForm implements ActionListener {
                 null,
                 null,
                 "");
+        if (currentPassword == null) {
+            return;
+        }
         if (!user.getPassword().equals(currentPassword)) {
             JOptionPane.showMessageDialog(this,
                     "Неверный пароль", "Ошибка", JOptionPane.ERROR_MESSAGE);
